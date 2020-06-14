@@ -14,6 +14,7 @@
 		909954CA2495A9EC008E36C3 /* toVisitPlaces_Chaitanya_C0777253.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 909954C82495A9EC008E36C3 /* toVisitPlaces_Chaitanya_C0777253.xcdatamodeld */; };
 		909954CC2495A9F2008E36C3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 909954CB2495A9F2008E36C3 /* Assets.xcassets */; };
 		909954CF2495A9F2008E36C3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 909954CD2495A9F2008E36C3 /* LaunchScreen.storyboard */; };
+		909954D72495B738008E36C3 /* FavouritePlacesUITableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 909954D62495B738008E36C3 /* FavouritePlacesUITableViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		909954CB2495A9F2008E36C3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		909954CE2495A9F2008E36C3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		909954D02495A9F2008E36C3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		909954D62495B738008E36C3 /* FavouritePlacesUITableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouritePlacesUITableViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +68,7 @@
 				909954CD2495A9F2008E36C3 /* LaunchScreen.storyboard */,
 				909954D02495A9F2008E36C3 /* Info.plist */,
 				909954C82495A9EC008E36C3 /* toVisitPlaces_Chaitanya_C0777253.xcdatamodeld */,
+				909954D62495B738008E36C3 /* FavouritePlacesUITableViewController.swift */,
 			);
 			path = toVisitPlaces_Chaitanya_C0777253;
 			sourceTree = "<group>";
@@ -145,6 +148,7 @@
 				909954CA2495A9EC008E36C3 /* toVisitPlaces_Chaitanya_C0777253.xcdatamodeld in Sources */,
 				909954C02495A9EC008E36C3 /* AppDelegate.swift in Sources */,
 				909954C22495A9EC008E36C3 /* SceneDelegate.swift in Sources */,
+				909954D72495B738008E36C3 /* FavouritePlacesUITableViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
