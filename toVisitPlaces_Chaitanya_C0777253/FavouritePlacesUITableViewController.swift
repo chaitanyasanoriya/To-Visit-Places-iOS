@@ -7,40 +7,82 @@
 //
 
 import UIKit
+import CoreData
 
 class FavouritePlacesUITableViewController: UITableViewController {
 
+    @IBOutlet var mTableView: UITableView!
+    private var mPlaces: [Place] = []
+    {
+        didSet
+        {
+            print("calling reload")
+            dump(mPlaces)
+            mTableView.reloadData()
+        }
+    }
+    private var mContext: NSManagedObjectContext!
+    private var cellReuseIdentifier = "reuse"
+    private var mPlace: Place?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        setupCoreData()
+        getAllPlaces()
+        PlacesHelper.loadPlaces(context: self.mContext)
+        mPlaces = PlacesHelper.getPlaces()
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
+    
+    func setupCoreData()
+    {
+        //Setting up Core Data variables for this UIViewController
+        let app_delegate = UIApplication.shared.delegate as! AppDelegate
+        self.mContext = app_delegate.persistentContainer.viewContext
+    }
+    
+    func getAllPlaces()
+    {
+        
+    }
+    
+    
 
     // MARK: - Table view data source
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
-        return 0
-    }
+//    override func numberOfSections(in tableView: UITableView) -> Int {
+//        // #warning Incomplete implementation, return the number of sections
+//
+//    }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 0
+        print("self.mPlaces.count \(self.mPlaces.count)")
+        return self.mPlaces.count
     }
 
-    /*
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
+        print("data")
+        var cell = tableView.dequeueReusableCell(withIdentifier: self.cellReuseIdentifier)
+        if cell == nil
+        {
+            print("creating new cell")
+            cell = UITableViewCell(style: UITableViewCell.CellStyle.subtitle, reuseIdentifier: self.cellReuseIdentifier)
+        }
+        else
+        {
+            print("re-using cell with text \(cell!.textLabel!.text!)")
+        }
+        cell?.textLabel?.text = self.mPlaces[indexPath.row].title
+        cell?.detailTextLabel?.text = self.mPlaces[indexPath.row].subtitle
 
-        // Configure the cell...
-
-        return cell
+        //print("self.mPlaces[indexPath.row].title \(self.mPlaces[indexPath.row].title)")
+        return cell!
     }
-    */
 
     /*
     // Override to support conditional editing of the table view.
@@ -87,6 +129,11 @@ class FavouritePlacesUITableViewController: UITableViewController {
     }
     */
     
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        mPlace = mPlaces[indexPath.row]
+        performSegue(withIdentifier: "toMap", sender: self)
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         self.navigationController?.setNavigationBarHidden(true, animated: true)
     }
@@ -94,4 +141,13 @@ class FavouritePlacesUITableViewController: UITableViewController {
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.setNavigationBarHidden(false, animated: true)
     }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "toMap" && mPlace != nil
+        {
+            let vc = segue.destination as! ViewController
+            vc.mPlace = mPlace!
+        }
+    }
+    
 }

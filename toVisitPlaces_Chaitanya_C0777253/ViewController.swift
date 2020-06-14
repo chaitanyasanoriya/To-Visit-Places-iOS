@@ -15,22 +15,31 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var mMapView: MKMapView!
     
+    private var mContext: NSManagedObjectContext!
     let mLocationManager = CLLocationManager()
     let SPAN = MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     var mDestination: CLLocation?
     var mTransportType: MKDirectionsTransportType = .automobile
     @IBOutlet weak var mSegmentedControl: UISegmentedControl!
     @IBOutlet weak var mBackButton: UIButton!
-    var mPlaces: Places?
+    var mPlace: Place?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.setNavigationBarHidden(true, animated: true)
+        setupCoreData()
         checkLocationServices()
         removeTapGestures()
         addDoubleTapGesture()
         showPinchHint()
         setupBackButton()
+    }
+    
+    func setupCoreData()
+    {
+        //Setting up Core Data variables for this UIViewController
+        let app_delegate = UIApplication.shared.delegate as! AppDelegate
+        self.mContext = app_delegate.persistentContainer.viewContext
     }
     
     func setupBackButton()
@@ -150,11 +159,7 @@ class ViewController: UIViewController {
             annotation.title = title
             annotation.subtitle = subtitle
             self.mMapView.addAnnotation(annotation)
-            self.mPlaces = Places()
-//            self.mPlaces!.latitude = newCoordinates.latitude
-//            self.mPlaces!.longitude = newCoordinates.longitude
-//            self.mPlaces!.title = title
-//            self.mPlaces!.subtitle = subtitle
+            self.mPlace = Place(longitude: newCoordinates.longitude, latitude: newCoordinates.latitude, title: title, subtitle: subtitle)
         })
     }
     
@@ -309,6 +314,31 @@ class ViewController: UIViewController {
         self.navigationController?.popViewController(animated: true)
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        self.mPlace = nil
+    }
+    
+    private func savePlaceInDataBase(place: Place, context: NSManagedObjectContext)
+    {
+        //Creating a new Car entity
+        let place_entity = NSEntityDescription.insertNewObject(forEntityName: "Place", into: context)
+        
+        //Setting the data into entity
+        place_entity.setValue(place.longitude, forKey: "longitude")
+        place_entity.setValue(place.latitude, forKey: "latitude")
+        place_entity.setValue(place.title, forKey: "title")
+        place_entity.setValue(place.subtitle, forKey: "subtitle")
+        //Trying to save the entity into the database
+        do
+        {
+            try context.save()
+        }
+        catch
+        {
+            //Prints error if there was a problem in saving the database
+            print(error)
+        }
+    }
 }
 
 extension ViewController: CLLocationManagerDelegate
@@ -352,10 +382,14 @@ extension ViewController: MKMapViewDelegate
     
     //MARK: - callout accessory control tapped
     func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        let alertController = UIAlertController(title: "Your Place", message: "Welcome", preferredStyle: .alert)
-        let cancelAction = UIAlertAction(title: "OK", style: .cancel, handler: nil)
-        alertController.addAction(cancelAction)
-        present(alertController, animated: true, completion: nil)
+        if mPlace != nil
+        {
+            savePlaceInDataBase(place: mPlace!, context: self.mContext)
+        }
+//        let alertController = UIAlertController(title: "Your Place", message: "Welcome", preferredStyle: .alert)
+//        let cancelAction = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+//        alertController.addAction(cancelAction)
+//        present(alertController, animated: true, completion: nil)
     }
 }
 extension UserDefaults {
@@ -365,20 +399,3 @@ extension UserDefaults {
     }
     
 }
-
-extension MKAnnotationView {
-    
-    func container(arrangedSubviews: [UIView]) {
-        let stackView = UIStackView(arrangedSubviews: arrangedSubviews)
-        stackView.axis = .horizontal
-        stackView.distribution = .fillEqually
-        stackView.alignment = .fill
-        stackView.spacing = 5
-        stackView.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin, .flexibleLeftMargin, .flexibleBottomMargin, .flexibleWidth, .flexibleHeight]
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        self.detailCalloutAccessoryView = stackView
-    }
-}
-
-

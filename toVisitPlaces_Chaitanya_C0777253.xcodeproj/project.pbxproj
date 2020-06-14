@@ -15,6 +15,8 @@
 		909954CC2495A9F2008E36C3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 909954CB2495A9F2008E36C3 /* Assets.xcassets */; };
 		909954CF2495A9F2008E36C3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 909954CD2495A9F2008E36C3 /* LaunchScreen.storyboard */; };
 		909954D72495B738008E36C3 /* FavouritePlacesUITableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 909954D62495B738008E36C3 /* FavouritePlacesUITableViewController.swift */; };
+		909954DF2495F6DA008E36C3 /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = 909954DD2495F6DA008E36C3 /* Place.swift */; };
+		909954E12495FCEC008E36C3 /* PlacesHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 909954E02495FCEC008E36C3 /* PlacesHelper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +30,8 @@
 		909954CE2495A9F2008E36C3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		909954D02495A9F2008E36C3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		909954D62495B738008E36C3 /* FavouritePlacesUITableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouritePlacesUITableViewController.swift; sourceTree = "<group>"; };
+		909954DD2495F6DA008E36C3 /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
+		909954E02495FCEC008E36C3 /* PlacesHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacesHelper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +64,7 @@
 		909954BE2495A9EC008E36C3 /* toVisitPlaces_Chaitanya_C0777253 */ = {
 			isa = PBXGroup;
 			children = (
+				909954DD2495F6DA008E36C3 /* Place.swift */,
 				909954BF2495A9EC008E36C3 /* AppDelegate.swift */,
 				909954C12495A9EC008E36C3 /* SceneDelegate.swift */,
 				909954C32495A9EC008E36C3 /* ViewController.swift */,
@@ -69,6 +74,7 @@
 				909954D02495A9F2008E36C3 /* Info.plist */,
 				909954C82495A9EC008E36C3 /* toVisitPlaces_Chaitanya_C0777253.xcdatamodeld */,
 				909954D62495B738008E36C3 /* FavouritePlacesUITableViewController.swift */,
+				909954E02495FCEC008E36C3 /* PlacesHelper.swift */,
 			);
 			path = toVisitPlaces_Chaitanya_C0777253;
 			sourceTree = "<group>";
@@ -145,8 +151,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				909954C42495A9EC008E36C3 /* ViewController.swift in Sources */,
+				909954DF2495F6DA008E36C3 /* Place.swift in Sources */,
 				909954CA2495A9EC008E36C3 /* toVisitPlaces_Chaitanya_C0777253.xcdatamodeld in Sources */,
 				909954C02495A9EC008E36C3 /* AppDelegate.swift in Sources */,
+				909954E12495FCEC008E36C3 /* PlacesHelper.swift in Sources */,
 				909954C22495A9EC008E36C3 /* SceneDelegate.swift in Sources */,
 				909954D72495B738008E36C3 /* FavouritePlacesUITableViewController.swift in Sources */,
 			);
