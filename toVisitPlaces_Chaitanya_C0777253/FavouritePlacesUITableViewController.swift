@@ -7,51 +7,33 @@
 //
 
 import UIKit
-import CoreData
 
 class FavouritePlacesUITableViewController: UITableViewController {
-
+    
     @IBOutlet var mTableView: UITableView!
     private var mPlaces: [Place] = []
-    private var mContext: NSManagedObjectContext!
     private var cellReuseIdentifier = "reuse"
     private var mPlace: Place?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupCoreData()
-        PlacesHelper.loadPlaces(context: self.mContext)
-        mPlaces = PlacesHelper.getPlaces()
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        mPlaces = PlacesHelper.getInstance().getPlaces()
+        let notificationCenter = NotificationCenter.default
+        notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.willResignActiveNotification, object: nil)
     }
     
-    func setupCoreData()
+    @objc func appMovedToBackground()
     {
-        //Setting up Core Data variables for this UIViewController
-        let app_delegate = UIApplication.shared.delegate as! AppDelegate
-        self.mContext = app_delegate.persistentContainer.viewContext
+        PlacesHelper.getInstance().savePlaces()
     }
     
-    
-
-    // MARK: - Table view data source
-
-//    override func numberOfSections(in tableView: UITableView) -> Int {
-//        // #warning Incomplete implementation, return the number of sections
-//
-//    }
-
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        self.mPlaces = PlacesHelper.getPlaces()
+        self.mPlaces = PlacesHelper.getInstance().getPlaces()
         print("self.mPlaces.count \(self.mPlaces.count)")
         return self.mPlaces.count
     }
-
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var cell = tableView.dequeueReusableCell(withIdentifier: self.cellReuseIdentifier)
         if cell == nil
@@ -60,56 +42,57 @@ class FavouritePlacesUITableViewController: UITableViewController {
         }
         cell?.textLabel?.text = self.mPlaces[indexPath.row].title
         cell?.detailTextLabel?.text = self.mPlaces[indexPath.row].subtitle
+        cell?.detailTextLabel?.adjustsFontSizeToFitWidth = true
         let image_view = UIImageView(image: UIImage(systemName: "greaterthan"))
         cell?.accessoryView = image_view
         //print("self.mPlaces[indexPath.row].title \(self.mPlaces[indexPath.row].title)")
         return cell!
     }
-
+    
     /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
+     // Override to support conditional editing of the table view.
+     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+     // Return false if you do not want the specified item to be editable.
+     return true
+     }
+     */
+    
     /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
+     // Override to support editing the table view.
+     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+     if editingStyle == .delete {
+     // Delete the row from the data source
+     tableView.deleteRows(at: [indexPath], with: .fade)
+     } else if editingStyle == .insert {
+     // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+     }
+     }
+     */
+    
     /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
+     // Override to support rearranging the table view.
+     override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
+     
+     }
+     */
+    
     /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
+     // Override to support conditional rearranging of the table view.
+     override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
+     // Return false if you do not want the item to be re-orderable.
+     return true
+     }
+     */
+    
     /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
+     // MARK: - Navigation
+     
+     // In a storyboard-based application, you will often want to do a little preparation before navigation
+     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+     // Get the new view controller using segue.destination.
+     // Pass the selected object to the new view controller.
+     }
+     */
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         mPlace = mPlaces[indexPath.row]
@@ -122,6 +105,7 @@ class FavouritePlacesUITableViewController: UITableViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.setNavigationBarHidden(false, animated: true)
+        mPlace = nil
         self.mTableView.reloadData()
     }
     
@@ -137,8 +121,9 @@ class FavouritePlacesUITableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete
         {
-            PlacesHelper.remove(at: indexPath.row, context: self.mContext)
+            PlacesHelper.getInstance().remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
         }
     }
+    
 }

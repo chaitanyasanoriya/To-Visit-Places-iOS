@@ -9,13 +9,10 @@
 import UIKit
 import MapKit
 import CoreLocation
-import CoreData
 
 class ViewController: UIViewController {
     
     @IBOutlet weak var mMapView: MKMapView!
-    
-    private var mContext: NSManagedObjectContext!
     let mLocationManager = CLLocationManager()
     let SPAN = MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     var mDestination: CLLocation?
@@ -28,7 +25,6 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.setNavigationBarHidden(true, animated: true)
-        setupCoreData()
         checkLocationServices()
         removeTapGestures()
         addDoubleTapGesture()
@@ -38,13 +34,6 @@ class ViewController: UIViewController {
         {
             showAnnotation(place: self.mPlace!)
         }
-    }
-    
-    func setupCoreData()
-    {
-        //Setting up Core Data variables for this UIViewController
-        let app_delegate = UIApplication.shared.delegate as! AppDelegate
-        self.mContext = app_delegate.persistentContainer.viewContext
     }
     
     func setupBackButton()
@@ -151,8 +140,8 @@ class ViewController: UIViewController {
         removeOverlaysAndAnnotations()
         let touchPoint = gestureRecognizer.location(in: mMapView)
         let newCoordinates = mMapView.convert(touchPoint, toCoordinateFrom: mMapView)
-//        let annotation = MKPointAnnotation()
-//        annotation.coordinate = newCoordinates
+        //        let annotation = MKPointAnnotation()
+        //        annotation.coordinate = newCoordinates
         mDestination = CLLocation(latitude: newCoordinates.latitude, longitude: newCoordinates.longitude)
         CLGeocoder().reverseGeocodeLocation(self.mDestination!, completionHandler: {(placemarks, error) -> Void in
             if error != nil {
@@ -161,9 +150,9 @@ class ViewController: UIViewController {
             }
             
             let (title, subtitle) = self.getTitleSubTitle(placemarks?[0])
-//            annotation.title = title
-//            annotation.subtitle = subtitle
-//            self.mMapView.addAnnotation(annotation)
+            //            annotation.title = title
+            //            annotation.subtitle = subtitle
+            //            self.mMapView.addAnnotation(annotation)
             self.mPlace = Place(longitude: newCoordinates.longitude, latitude: newCoordinates.latitude, title: title, subtitle: subtitle)
             self.mAlreadyStarred = false
             self.showAnnotation(place: self.mPlace!)
@@ -258,8 +247,12 @@ class ViewController: UIViewController {
             showAlert(title: "Error", message: "The Application was not able to find your current location, please try again later.")
             return
         }
-        if mDestination != nil
+        if mDestination != nil || mPlace != nil
         {
+            if(mDestination == nil && mPlace != nil)
+            {
+                mDestination = CLLocation(latitude: mPlace!.latitude, longitude: mPlace!.longitude)
+            }
             mMapView.removeOverlays(mMapView.overlays)
             let request = createDirectionRequest(from: location)
             let directions = MKDirections(request: request)
@@ -368,6 +361,7 @@ extension ViewController: MKMapViewDelegate
         pinAnnotation.image = UIImage(named: "pin")
         pinAnnotation.centerOffset = CGPoint(x: 0,y: -(pinAnnotation.image?.size.height ?? 0)/2)
         pinAnnotation.canShowCallout = true
+        pinAnnotation.isDraggable = true
         let btn = UIButton(type: .detailDisclosure)
         btn.setImage(UIImage(systemName: "star.fill"), for: .normal)
         if self.mAlreadyStarred
@@ -388,14 +382,34 @@ extension ViewController: MKMapViewDelegate
         {
             if view.rightCalloutAccessoryView?.tintColor == UIColor.systemBlue
             {
-                PlacesHelper.removePlace(place: mPlace!, context: self.mContext)
+                PlacesHelper.getInstance().removePlace(place: mPlace!)
                 view.rightCalloutAccessoryView?.tintColor = UIColor.systemGray
             }
             else
             {
-                PlacesHelper.addPlace(place: mPlace!, context: self.mContext)
+                PlacesHelper.getInstance().addPlace(place: mPlace!)
                 view.rightCalloutAccessoryView?.tintColor = UIColor.systemBlue
             }
+        }
+    }
+    
+    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, didChange newState: MKAnnotationView.DragState, fromOldState oldState: MKAnnotationView.DragState) {
+        print(newState)
+        if newState == .ending
+        {
+            self.mDestination = CLLocation(latitude: view.annotation!.coordinate.latitude, longitude: view.annotation!.coordinate.longitude)
+            CLGeocoder().reverseGeocodeLocation(self.mDestination!, completionHandler: {(placemarks, error) -> Void in
+                if error != nil {
+                    print("Reverse geocoder failed with error" + error!.localizedDescription )
+                    return
+                }
+                let (title, subtitle) = self.getTitleSubTitle(placemarks?[0])
+                let place = Place(longitude: view.annotation!.coordinate.longitude, latitude: view.annotation!.coordinate.latitude, title: title, subtitle: subtitle)
+                PlacesHelper.getInstance().replace(oldPlace: self.mPlace!, newPlace: place)
+                self.mPlace = place
+                self.mMapView.removeAnnotations(self.mMapView.annotations)
+                self.showAnnotation(place: place)
+            })
         }
     }
 }

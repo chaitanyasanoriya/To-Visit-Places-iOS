@@ -8,7 +8,7 @@
 //
 
 
-class Place
+class Place: Codable
 {
 
     public var longitude: Double
@@ -23,5 +23,4 @@ class Place
         self.title = title
         self.subtitle = subtitle
     }
-
 }
