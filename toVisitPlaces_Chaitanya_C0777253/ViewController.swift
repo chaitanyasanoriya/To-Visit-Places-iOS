@@ -38,7 +38,6 @@ class ViewController: UIViewController {
     
     func setupBackButton()
     {
-        //let button = UIButton(type: .custom)
         let image = UIImage(named: "back")?.withRenderingMode(.alwaysTemplate)
         mBackButton.setImage(image, for: .normal)
         mBackButton.tintColor = UIColor.systemBlue
@@ -140,8 +139,6 @@ class ViewController: UIViewController {
         removeOverlaysAndAnnotations()
         let touchPoint = gestureRecognizer.location(in: mMapView)
         let newCoordinates = mMapView.convert(touchPoint, toCoordinateFrom: mMapView)
-        //        let annotation = MKPointAnnotation()
-        //        annotation.coordinate = newCoordinates
         mDestination = CLLocation(latitude: newCoordinates.latitude, longitude: newCoordinates.longitude)
         CLGeocoder().reverseGeocodeLocation(self.mDestination!, completionHandler: {(placemarks, error) -> Void in
             if error != nil {
@@ -150,9 +147,6 @@ class ViewController: UIViewController {
             }
             
             let (title, subtitle) = self.getTitleSubTitle(placemarks?[0])
-            //            annotation.title = title
-            //            annotation.subtitle = subtitle
-            //            self.mMapView.addAnnotation(annotation)
             self.mPlace = Place(longitude: newCoordinates.longitude, latitude: newCoordinates.latitude, title: title, subtitle: subtitle)
             self.mAlreadyStarred = false
             self.showAnnotation(place: self.mPlace!)
