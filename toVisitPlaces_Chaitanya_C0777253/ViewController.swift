@@ -23,6 +23,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var mSegmentedControl: UISegmentedControl!
     @IBOutlet weak var mBackButton: UIButton!
     var mPlace: Place?
+    var mAlreadyStarred: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,6 +34,10 @@ class ViewController: UIViewController {
         addDoubleTapGesture()
         showPinchHint()
         setupBackButton()
+        if self.mPlace != nil
+        {
+            showAnnotation(place: self.mPlace!)
+        }
     }
     
     func setupCoreData()
@@ -146,8 +151,8 @@ class ViewController: UIViewController {
         removeOverlaysAndAnnotations()
         let touchPoint = gestureRecognizer.location(in: mMapView)
         let newCoordinates = mMapView.convert(touchPoint, toCoordinateFrom: mMapView)
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = newCoordinates
+//        let annotation = MKPointAnnotation()
+//        annotation.coordinate = newCoordinates
         mDestination = CLLocation(latitude: newCoordinates.latitude, longitude: newCoordinates.longitude)
         CLGeocoder().reverseGeocodeLocation(self.mDestination!, completionHandler: {(placemarks, error) -> Void in
             if error != nil {
@@ -156,11 +161,22 @@ class ViewController: UIViewController {
             }
             
             let (title, subtitle) = self.getTitleSubTitle(placemarks?[0])
-            annotation.title = title
-            annotation.subtitle = subtitle
-            self.mMapView.addAnnotation(annotation)
+//            annotation.title = title
+//            annotation.subtitle = subtitle
+//            self.mMapView.addAnnotation(annotation)
             self.mPlace = Place(longitude: newCoordinates.longitude, latitude: newCoordinates.latitude, title: title, subtitle: subtitle)
+            self.mAlreadyStarred = false
+            self.showAnnotation(place: self.mPlace!)
         })
+    }
+    
+    func showAnnotation(place: Place)
+    {
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = CLLocationCoordinate2D(latitude: place.latitude, longitude: place.longitude)
+        annotation.title = place.title
+        annotation.subtitle = place.subtitle
+        self.mMapView.addAnnotation(annotation)
     }
     
     func getTitleSubTitle( _ placemark: CLPlacemark?) -> (String, String?)
@@ -318,27 +334,6 @@ class ViewController: UIViewController {
         self.mPlace = nil
     }
     
-    private func savePlaceInDataBase(place: Place, context: NSManagedObjectContext)
-    {
-        //Creating a new Car entity
-        let place_entity = NSEntityDescription.insertNewObject(forEntityName: "Place", into: context)
-        
-        //Setting the data into entity
-        place_entity.setValue(place.longitude, forKey: "longitude")
-        place_entity.setValue(place.latitude, forKey: "latitude")
-        place_entity.setValue(place.title, forKey: "title")
-        place_entity.setValue(place.subtitle, forKey: "subtitle")
-        //Trying to save the entity into the database
-        do
-        {
-            try context.save()
-        }
-        catch
-        {
-            //Prints error if there was a problem in saving the database
-            print(error)
-        }
-    }
 }
 
 extension ViewController: CLLocationManagerDelegate
@@ -375,7 +370,14 @@ extension ViewController: MKMapViewDelegate
         pinAnnotation.canShowCallout = true
         let btn = UIButton(type: .detailDisclosure)
         btn.setImage(UIImage(systemName: "star.fill"), for: .normal)
-        btn.tintColor = UIColor.systemGray
+        if self.mAlreadyStarred
+        {
+            btn.tintColor = UIColor.systemBlue
+        }
+        else
+        {
+            btn.tintColor = UIColor.systemGray
+        }
         pinAnnotation.rightCalloutAccessoryView = btn
         return pinAnnotation
     }
@@ -384,12 +386,17 @@ extension ViewController: MKMapViewDelegate
     func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         if mPlace != nil
         {
-            savePlaceInDataBase(place: mPlace!, context: self.mContext)
+            if view.rightCalloutAccessoryView?.tintColor == UIColor.systemBlue
+            {
+                PlacesHelper.removePlace(place: mPlace!, context: self.mContext)
+                view.rightCalloutAccessoryView?.tintColor = UIColor.systemGray
+            }
+            else
+            {
+                PlacesHelper.addPlace(place: mPlace!, context: self.mContext)
+                view.rightCalloutAccessoryView?.tintColor = UIColor.systemBlue
+            }
         }
-//        let alertController = UIAlertController(title: "Your Place", message: "Welcome", preferredStyle: .alert)
-//        let cancelAction = UIAlertAction(title: "OK", style: .cancel, handler: nil)
-//        alertController.addAction(cancelAction)
-//        present(alertController, animated: true, completion: nil)
     }
 }
 extension UserDefaults {

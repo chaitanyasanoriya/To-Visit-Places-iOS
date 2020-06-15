@@ -13,14 +13,6 @@ class FavouritePlacesUITableViewController: UITableViewController {
 
     @IBOutlet var mTableView: UITableView!
     private var mPlaces: [Place] = []
-    {
-        didSet
-        {
-            print("calling reload")
-            dump(mPlaces)
-            mTableView.reloadData()
-        }
-    }
     private var mContext: NSManagedObjectContext!
     private var cellReuseIdentifier = "reuse"
     private var mPlace: Place?
@@ -28,7 +20,6 @@ class FavouritePlacesUITableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCoreData()
-        getAllPlaces()
         PlacesHelper.loadPlaces(context: self.mContext)
         mPlaces = PlacesHelper.getPlaces()
         // Uncomment the following line to preserve selection between presentations
@@ -45,11 +36,6 @@ class FavouritePlacesUITableViewController: UITableViewController {
         self.mContext = app_delegate.persistentContainer.viewContext
     }
     
-    func getAllPlaces()
-    {
-        
-    }
-    
     
 
     // MARK: - Table view data source
@@ -61,25 +47,21 @@ class FavouritePlacesUITableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
+        self.mPlaces = PlacesHelper.getPlaces()
         print("self.mPlaces.count \(self.mPlaces.count)")
         return self.mPlaces.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        print("data")
         var cell = tableView.dequeueReusableCell(withIdentifier: self.cellReuseIdentifier)
         if cell == nil
         {
-            print("creating new cell")
             cell = UITableViewCell(style: UITableViewCell.CellStyle.subtitle, reuseIdentifier: self.cellReuseIdentifier)
-        }
-        else
-        {
-            print("re-using cell with text \(cell!.textLabel!.text!)")
         }
         cell?.textLabel?.text = self.mPlaces[indexPath.row].title
         cell?.detailTextLabel?.text = self.mPlaces[indexPath.row].subtitle
-
+        let image_view = UIImageView(image: UIImage(systemName: "greaterthan"))
+        cell?.accessoryView = image_view
         //print("self.mPlaces[indexPath.row].title \(self.mPlaces[indexPath.row].title)")
         return cell!
     }
@@ -140,6 +122,7 @@ class FavouritePlacesUITableViewController: UITableViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.setNavigationBarHidden(false, animated: true)
+        self.mTableView.reloadData()
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -147,7 +130,15 @@ class FavouritePlacesUITableViewController: UITableViewController {
         {
             let vc = segue.destination as! ViewController
             vc.mPlace = mPlace!
+            vc.mAlreadyStarred = true
         }
     }
     
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete
+        {
+            PlacesHelper.remove(at: indexPath.row, context: self.mContext)
+            tableView.deleteRows(at: [indexPath], with: .fade)
+        }
+    }
 }
