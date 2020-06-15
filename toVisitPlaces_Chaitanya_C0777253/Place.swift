@@ -8,6 +8,7 @@
 //
 
 
+/// Model Class Place which inherits Codable, which helps in ecoding and decoding the Class Object
 class Place: Codable
 {
 
